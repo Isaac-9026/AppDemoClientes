@@ -1,3 +1,6 @@
+using BOL;
+using DAL;
+
 namespace UI
 {
     internal static class Program
@@ -11,7 +14,19 @@ namespace UI
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new FrmCliente());
+
+            //Flujo UI -> BOL -> DAL (Entidad) -> | API REST -> BD |
+            var http = new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7281/"),
+                Timeout = TimeSpan.FromSeconds(15)
+            };
+
+            var dal = new ClienteDal(http);
+            var bol = new ClienteBol(dal);
+
+            //Pasamos BOL (lógica negocio) a UI para que interacúe con los datos
+            Application.Run(new FrmCliente(bol));
         }
     }
 }
