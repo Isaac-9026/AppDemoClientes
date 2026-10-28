@@ -1,0 +1,28 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code files
+*.cs text diff=csharp
+*.xaml text
+*.xml text
+*.config text
+*.json text
+*.md text
+
+# Solution and project files
+*.sln text merge=union
+*.slnx text
+*.csproj text merge=union
+*.props text
+*.targets text
+
+# Windows Forms resource files
+*.resx text
+
+# Binary files
+*.dll binary
+*.exe binary
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
