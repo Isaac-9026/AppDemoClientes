@@ -1,10 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace DAL
-{
-    internal class ApiException
+{   
+    //Subclase de Exceptiob (superclase)
+    public class ApiException : Exception
     {
+        //Constructor (método inicializados)
+        //Anulando el constructor predeterminado  vacío => public Clase() {}
+        //base(message)
+        public ApiException(string message) : base(message) { }
     }
 }
