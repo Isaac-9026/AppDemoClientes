@@ -1,3 +1,6 @@
+using System;
+using System.Net.Http;
+using System.Windows.Forms;
 using BOL;
 using DAL;
 
@@ -11,22 +14,25 @@ namespace UI
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            //Flujo UI -> BOL -> DAL (Entidad) -> | API REST -> BD |
+            // Configurar HttpClient hacia la API REST
             var http = new HttpClient
             {
                 BaseAddress = new Uri("https://localhost:7097/"),
                 Timeout = TimeSpan.FromSeconds(15)
             };
 
-            var dal = new ClienteDal(http);
-            var bol = new ClienteBol(dal);
+            // Inyección de dependencias para Clientes
+            var clienteDal = new ClienteDal(http);
+            var clienteBol = new ClienteBol(clienteDal);
 
-            //Pasamos BOL (lógica negocio) a UI para que interacúe con los datos
-            Application.Run(new FrmCliente(bol));
+            // Inyección de dependencias para Proveedores
+            var proveedorDal = new ProveedorDal(http);
+            var proveedorBol = new ProveedorBol(proveedorDal);
+
+            // Iniciar aplicación desde el menú principal FrmMain
+            Application.Run(new FrmMain(clienteBol, proveedorBol));
         }
     }
 }
