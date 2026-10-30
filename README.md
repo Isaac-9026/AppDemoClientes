@@ -1,63 +1,66 @@
 # AppDemoClientes
 
-Aplicación de escritorio Windows Forms desarrollada en C# y .NET 10.0 con arquitectura en capas (N-Tier) para la gestión integral de clientes, conectada a la API REST backend [ClienteApi (aspnet-cliente-api)](https://github.com/Isaac-9026/aspnet-cliente-api).
+Aplicación de escritorio Windows Forms desarrollada en C# y .NET 10.0 con arquitectura en capas (N-Tier) para la gestión integral de clientes y proveedores, conectada a la API REST backend [ClienteApi (aspnet-cliente-api)](https://github.com/Isaac-9026/aspnet-cliente-api).
 
 ---
 
 ## Arquitectura de la Solución
 
-El proyecto implementa el patrón de arquitectura por capas desacopladas mediante interfaces e inyección de dependencias:
+El proyecto implementa el patrón de arquitectura por capas desacopladas mediante interfaces e inyección de dependencias, centralizado a través de un formulario principal (`FrmMain`):
 
 ```text
-┌────────────────────────────────────────────────────────┐
-│                   UI (Windows Forms)                  │
-│       FrmCliente, FrmCliente.Designer, Program         │
-└───────────────────────────┬────────────────────────────┘
-                            │ usa
-┌───────────────────────────▼────────────────────────────┐
-│              BOL (Business Object Logic)               │
-│        ClienteBol, ReglaNegocioException               │
-└───────────────────────────┬────────────────────────────┘
-                            │ usa (IClienteDal)
-┌───────────────────────────▼────────────────────────────┐
-│               DAL (Data Access Layer)                  │
-│        IClienteDal, ClienteDal, ApiException           │
-└───────────────────────────┬────────────────────────────┘
-                            │ HTTP / JSON
-┌───────────────────────────▼────────────────────────────┐
-│                 REST API (ClienteApi)                  │
-│       https://github.com/Isaac-9026/aspnet-cliente-api │
-│                 https://localhost:7097                 │
-└────────────────────────────────────────────────────────┘
-                            ▲
-                            │ referencia
-┌───────────────────────────┴────────────────────────────┐
-│                   Entidades (Modelo)                   │
-│                        Cliente                         │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                          UI (Windows Forms)                            │
+│           FrmMain (Menú Principal: Clientes / Proveedores)             │
+│       ├── FrmCliente (Gestión CRUD de Clientes)                       │
+│       └── FrmProveedor (Gestión CRUD de Proveedores)                  │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ usa
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                      BOL (Business Object Logic)                       │
+│       ClienteBol, ProveedorBol, ReglaNegocioException                  │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ usa (IClienteDal, IProveedorDal)
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       DAL (Data Access Layer)                          │
+│       IClienteDal, ClienteDal, IProveedorDal, ProveedorDal,            │
+│       ApiException                                                     │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ HTTP / JSON
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                         REST API (ClienteApi)                          │
+│            https://github.com/Isaac-9026/aspnet-cliente-api            │
+│                         https://localhost:7097                         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▲
+                                    │ referencia
+┌───────────────────────────────────┴────────────────────────────────────┐
+│                           Entidades (Modelo)                           │
+│                           Cliente, Proveedor                           │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Descripción de Capas
 
 1. **Entidades (`Entidades/`)**:
-   - `Cliente.cs`: Modelo de dominio con propiedades principales (`Id`, `Dni`, `Apellidos`, `Nombres`, `Direccion`, `Telefono`, `Correo`, `Activo`, `CreadoEn`).
+   - `Cliente.cs`: Modelo de dominio del cliente (`Id`, `Dni`, `Apellidos`, `Nombres`, `Direccion`, `Telefono`, `Correo`).
+   - `Proveedor.cs`: Modelo de dominio del proveedor con 5 campos de negocio (`Id`, `Ruc`, `RazonSocial`, `Direccion`, `Telefono`, `Correo`).
 
 2. **DAL - Capa de Acceso a Datos (`DAL/`)**:
-   - `IClienteDal.cs`: Contrato asíncrono para operaciones CRUD (`ListarAsync`, `ObtenerAsync`, `CrearAsync`, `ActualizarAsync`, `EliminarAsync`).
-   - `ClienteDal.cs`: Implementación que consume los endpoints REST mediante `HttpClient` y `System.Net.Http.Json`.
+   - `IClienteDal.cs` / `ClienteDal.cs`: Contrato e implementación HTTP para operaciones CRUD sobre `/api/clientes`.
+   - `IProveedorDal.cs` / `ProveedorDal.cs`: Contrato e implementación HTTP para operaciones CRUD sobre `/api/proveedores`.
    - `ApiException.cs`: Excepción especializada para capturar códigos de estado HTTP y errores devueltos por la API.
 
 3. **BOL - Capa de Lógica de Negocio (`BOL/`)**:
-   - `ClienteBol.cs`: Valida reglas de negocio previas al envío a la API:
-     - DNI requerido y exactamente de 8 dígitos numéricos (`^\d{8}$`).
-     - Nombres y apellidos obligatorios con normalización de espacios.
-     - Teléfono de 9 dígitos numéricos si es provisto (`^\d{9}$`).
-     - Correo electrónico con estructura válida (`MailAddress`).
-   - `ReglaNegocioException.cs`: Excepción de negocio que indica el campo específico causante de la infracción para feedback directo al usuario.
+   - `ClienteBol.cs`: Valida DNI (8 dígitos numéricos), nombres, apellidos, teléfono y correo electrónico.
+   - `ProveedorBol.cs`: Valida RUC (11 dígitos numéricos), razón social, dirección, teléfono y correo electrónico.
+   - `ReglaNegocioException.cs`: Excepción de negocio que indica el campo causante para enfocar el control en la interfaz.
 
 4. **UI - Interfaz Gráfica (`UI/`)**:
-   - `FrmCliente.cs`: Formulario con listado en `DataGridView`, búsqueda con filtro por texto, edición directa, creación de nuevos clientes y eliminación con confirmación.
-   - `Program.cs`: Punto de entrada que configura `HttpClient` hacia `https://localhost:7097/`, establece timeout de 15 segundos e inyecta las dependencias hacia `FrmCliente`.
+   - `FrmMain.cs`: Menú de navegación principal con accesos directos a "Gestión de Clientes" y "Gestión de Proveedores".
+   - `FrmCliente.cs`: Formulario CRUD completo para clientes con búsqueda filtrada y validaciones.
+   - `FrmProveedor.cs`: Formulario CRUD completo para proveedores con búsqueda filtrada y validaciones.
+   - `Program.cs`: Configuración de inyección de dependencias (`HttpClient` -> DAL -> BOL) y arranque en `FrmMain`.
 
 ---
 
@@ -97,11 +100,15 @@ dotnet build AppDemoClientes.slnx
 dotnet run --project UI
 ```
 
+Al iniciar, se mostrará el formulario principal `FrmMain`, desde el cual podrá abrir `FrmCliente` o `FrmProveedor`.
+
 ---
 
 ## Endpoints REST Consumidos
 
-La aplicación interactúa con los siguientes recursos en `https://localhost:7097/api/clientes`:
+La aplicación interactúa con los siguientes recursos en `https://localhost:7097`:
+
+### Módulo Clientes (`/api/clientes`)
 
 | Método | Endpoint | Descripción |
 |---|---|---|
@@ -111,6 +118,16 @@ La aplicación interactúa con los siguientes recursos en `https://localhost:709
 | `PUT` | `/api/clientes/{id}` | Actualiza la información de un cliente existente. |
 | `DELETE` | `/api/clientes/{id}` | Elimina físicamente un cliente. |
 
+### Módulo Proveedores (`/api/proveedores`)
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| `GET` | `/api/proveedores?buscar={filtro}` | Lista proveedores filtrados por RUC, razón social o dirección. |
+| `GET` | `/api/proveedores/{id}` | Obtiene el detalle de un proveedor por su identificador. |
+| `POST` | `/api/proveedores` | Registra un nuevo proveedor validado (RUC de 11 dígitos único). |
+| `PUT` | `/api/proveedores/{id}` | Actualiza la información de un proveedor existente. |
+| `DELETE` | `/api/proveedores/{id}` | Elimina físicamente un proveedor. |
+
 ---
 
 ## Estructura del Repositorio
@@ -119,21 +136,29 @@ La aplicación interactúa con los siguientes recursos en `https://localhost:709
 AppDemoClientes/
 ├── AppDemoClientes.slnx       # Solución .NET
 ├── Entidades/
-│   ├── Cliente.cs             # Entidad de dominio Cliente
+│   ├── Cliente.cs             # Modelo Cliente
+│   ├── Proveedor.cs           # Modelo Proveedor (5 campos)
 │   └── Entidades.csproj
 ├── DAL/
-│   ├── IClienteDal.cs         # Interfaz de acceso a datos
-│   ├── ClienteDal.cs          # Implementación HTTP Client REST
+│   ├── IClienteDal.cs         # Interfaz de acceso a Clientes
+│   ├── ClienteDal.cs          # Implementación HTTP para Clientes
+│   ├── IProveedorDal.cs       # Interfaz de acceso a Proveedores
+│   ├── ProveedorDal.cs        # Implementación HTTP para Proveedores
 │   ├── ApiException.cs        # Excepción HTTP personalizada
 │   └── DAL.csproj
 ├── BOL/
-│   ├── ClienteBol.cs          # Validaciones y reglas de negocio
+│   ├── ClienteBol.cs          # Validaciones de Clientes
+│   ├── ProveedorBol.cs        # Validaciones de Proveedores
 │   ├── ReglaNegocioException.cs # Excepción de validación
 │   └── BOL.csproj
 └── UI/
-    ├── FrmCliente.cs          # Lógica de presentación y eventos
-    ├── FrmCliente.Designer.cs # Componentes y controles gráficos
-    ├── Program.cs             # Configuración DI y arranque
+    ├── FrmMain.cs             # Menú principal (Clientes / Proveedores)
+    ├── FrmMain.Designer.cs
+    ├── FrmCliente.cs          # Módulo CRUD Clientes
+    ├── FrmCliente.Designer.cs
+    ├── FrmProveedor.cs        # Módulo CRUD Proveedores
+    ├── FrmProveedor.Designer.cs
+    ├── Program.cs             # Configuración DI y arranque de FrmMain
     └── UI.csproj
 ```
 
@@ -146,3 +171,4 @@ AppDemoClientes/
 - **Cliente HTTP:** `System.Net.Http.Json` con `HttpClientHandler`
 - **Control de Versiones:** Git / GitHub
 - **API Backend Vinculada:** [Isaac-9026/aspnet-cliente-api](https://github.com/Isaac-9026/aspnet-cliente-api)
+- **Repositorio Cliente:** [Isaac-9026/AppDemoClientes](https://github.com/Isaac-9026/AppDemoClientes)
