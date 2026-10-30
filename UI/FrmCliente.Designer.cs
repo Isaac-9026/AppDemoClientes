@@ -67,13 +67,16 @@ namespace UI
             btnBuscar.TabIndex = 0;
             btnBuscar.Text = "buscar";
             btnBuscar.UseVisualStyleBackColor = true;
+            btnBuscar.Click += btnBuscar_Click;
             // 
             // txtBuscar
             // 
             txtBuscar.Location = new Point(115, 32);
             txtBuscar.Name = "txtBuscar";
+            txtBuscar.PlaceholderText = "Apellidos, nombres, dni";
             txtBuscar.Size = new Size(689, 23);
             txtBuscar.TabIndex = 1;
+            txtBuscar.KeyDown += txtBuscar_KeyDown;
             // 
             // label2
             // 
@@ -135,6 +138,9 @@ namespace UI
             txtApellidos.Name = "txtApellidos";
             txtApellidos.Size = new Size(287, 23);
             txtApellidos.TabIndex = 8;
+            txtApellidos.TextChanged += txtApellidos_TextChanged;
+            txtApellidos.Enter += txtApellidos_Enter;
+            txtApellidos.Leave += txtApellidos_Leave;
             // 
             // txtNombres
             // 
@@ -149,6 +155,8 @@ namespace UI
             txtDni.Name = "txtDni";
             txtDni.Size = new Size(287, 23);
             txtDni.TabIndex = 10;
+            txtDni.TextChanged += txtDni_TextChanged;
+            txtDni.KeyPress += SoloDigitos;
             // 
             // txtTelefono
             // 
@@ -156,6 +164,7 @@ namespace UI
             txtTelefono.Name = "txtTelefono";
             txtTelefono.Size = new Size(307, 23);
             txtTelefono.TabIndex = 11;
+            txtTelefono.KeyPress += SoloDigitos;
             // 
             // txtCorreo
             // 
@@ -179,6 +188,7 @@ namespace UI
             btnNuevo.TabIndex = 14;
             btnNuevo.Text = "Nuevo";
             btnNuevo.UseVisualStyleBackColor = true;
+            btnNuevo.Click += btnNuevo_Click;
             // 
             // btnGuardar
             // 
@@ -188,6 +198,7 @@ namespace UI
             btnGuardar.TabIndex = 16;
             btnGuardar.Text = "Guardar";
             btnGuardar.UseVisualStyleBackColor = true;
+            btnGuardar.Click += btnGuardar_Click;
             // 
             // btnEliminar
             // 
@@ -197,14 +208,25 @@ namespace UI
             btnEliminar.TabIndex = 17;
             btnEliminar.Text = "Eliminar";
             btnEliminar.UseVisualStyleBackColor = true;
+            btnEliminar.Click += btnEliminar_Click;
             // 
             // grid
             // 
+            grid.AllowUserToAddRows = false;
+            grid.AllowUserToDeleteRows = false;
+            grid.AllowUserToOrderColumns = true;
+            grid.AllowUserToResizeColumns = false;
+            grid.AllowUserToResizeRows = false;
+            grid.BackgroundColor = SystemColors.InactiveBorder;
             grid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             grid.Location = new Point(50, 75);
+            grid.MultiSelect = false;
             grid.Name = "grid";
+            grid.ReadOnly = true;
+            grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             grid.Size = new Size(892, 331);
             grid.TabIndex = 18;
+            grid.SelectionChanged += grid_SelectionChanged;
             // 
             // FrmCliente
             // 

@@ -18,7 +18,7 @@ namespace UI
             //Flujo UI -> BOL -> DAL (Entidad) -> | API REST -> BD |
             var http = new HttpClient
             {
-                BaseAddress = new Uri("https://localhost:7281/"),
+                BaseAddress = new Uri("https://localhost:7097/"),
                 Timeout = TimeSpan.FromSeconds(15)
             };
 
